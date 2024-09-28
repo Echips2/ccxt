@@ -1,0 +1,53 @@
+import ccxt
+import time
+
+# Inizializza le API per Binance e Kraken
+binance = ccxt.binance({
+    'apiKey': 'your_binance_api_key',
+    'secret': 'your_binance_secret',
+})
+
+kraken = ccxt.kraken({
+    'apiKey': 'your_kraken_api_key',
+    'secret': 'your_kraken_secret',
+})
+
+# Funzione per ottenere i prezzi attuali
+def get_prices():
+    binance_ticker = binance.fetch_ticker('BTC/USDT')
+    kraken_ticker = kraken.fetch_ticker('BTC/USD')
+    
+    return binance_ticker['last'], kraken_ticker['last']
+
+# Funzione principale per eseguire arbitraggio
+def execute_arbitrage():
+    while True:
+        binance_price, kraken_price = get_prices()
+        
+        print(f"Binance Price: {binance_price} USDT, Kraken Price: {kraken_price} USD")
+
+        # Verifica se c'è un'opportunità di arbitraggio
+        if kraken_price > binance_price * 1.02:  # Prezzo su Kraken > Prezzo su Binance + 2%
+            amount = 0.001  # Quantità da scambiare
+
+            try:
+                print("Eseguendo acquisto su Binance...")
+                # Esegui ordine di acquisto su Binance
+                binance_order = binance.create_market_buy_order('BTC/USDT', amount)
+                print(f"Ordine di acquisto eseguito su Binance: {binance_order}")
+
+                print("Eseguendo vendita su Kraken...")
+                # Esegui ordine di vendita su Kraken
+                kraken_order = kraken.create_market_sell_order('BTC/USD', amount)
+                print(f"Ordine di vendita eseguito su Kraken: {kraken_order}")
+
+            except Exception as e:
+                print(f"Errore nell'esecuzione degli ordini: {e}")
+        
+        else:
+            print("Nessuna opportunità di arbitraggio trovata.")
+        
+        time.sleep(5)  # Attendere 5 secondi prima di controllare di nuovo
+
+# Avvia il bot di arbitraggio
+execute_arbitrage()
