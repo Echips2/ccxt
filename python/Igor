@@ -1,0 +1,41 @@
+from binance.client import Client
+import time
+
+# Inserisci le tue API Key e Secret Key qui
+api_key = 'la_tua_api_key'
+api_secret = 'la_tua_secret_key'
+
+client = Client(api_key, api_secret)
+
+def get_price(symbol):
+    """Ottieni il prezzo corrente di una coppia"""
+    ticker = client.get_symbol_ticker(symbol=symbol)
+    return float(ticker['price'])
+
+def arbitraggio_triangolare():
+    while True:
+        try:
+            # Coppie da monitorare
+            usdt_btc = get_price('BTCUSDT')
+            btc_eth = get_price('ETHBTC')
+            eth_usdt = get_price('ETHUSDT')
+
+            # Calcola il potenziale di arbitraggio
+            triangolo_1 = usdt_btc / btc_eth
+            triangolo_2 = eth_usdt
+
+            if triangolo_1 < triangolo_2:
+                print("Opportunità di arbitraggio trovata!")
+                print(f"Acquista ETH con USDT a {eth_usdt} e vendi per BTC a {btc_eth}")
+                # Qui puoi aggiungere logica per eseguire il trade
+            else:
+                print("Nessuna opportunità di arbitraggio.")
+
+        except Exception as e:
+            print(f"Errore: {e}")
+
+        # Tempo di attesa prima della prossima iterazione
+        time.sleep(10)
+
+# Avvia il bot
+arbitraggio_triangolare()
